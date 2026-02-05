@@ -3082,7 +3082,9 @@ void Print::_make_wipe_tower()
     // BBS
     const unsigned int number_of_extruders = (unsigned int)(m_config.filament_colour.values.size());
 
-    const auto bUseWipeTower2 = is_BBL_printer() || is_QIDI_printer() ? false : true;
+    // const auto bUseWipeTower2 = is_BBL_printer() || is_QIDI_printer() ? false : true;
+    constexpr bool bUseWipeTower2 = false;
+
     // Let the ToolOrdering class know there will be initial priming extrusions at the start of the print.
     m_wipe_tower_data.tool_ordering = ToolOrdering(*this, (unsigned int) -1, bUseWipeTower2 ? true : false);
     m_wipe_tower_data.tool_ordering.sort_and_build_data(*this, (unsigned int)-1, bUseWipeTower2 ? true : false);
