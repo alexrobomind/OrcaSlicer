@@ -3310,7 +3310,7 @@ void Print::_make_wipe_tower()
                         current_extruder_id) {
                         float volume_to_wipe = m_config.prime_volume;
 						
-                        if (m_config.purge_in_prime_tower && m_config.single_extruder_multi_material && !swappingToStandalone) {
+                        if (m_config.purge_in_prime_tower && m_config.single_extruder_multi_material && !swappingToStandalone && extruder_id != current_shared_id) {
                             volume_to_wipe = wipe_volumes[current_shared_id][extruder_id]; // total volume to wipe after this toolchange
                             volume_to_wipe *= m_config.flush_multiplier.get_at(0);
                             // Not all of that can be used for infill purging:
