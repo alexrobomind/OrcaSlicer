@@ -3293,6 +3293,10 @@ void Print::_make_wipe_tower()
         // to pass to wipe_tower (so that it can use it for planning the layout of the tower)
         {
             unsigned int current_extruder_id = m_wipe_tower_data.tool_ordering.all_extruders().back();
+			unsigned int current_shared_id = current_extruder_id;
+			
+			const std::set<unsigned int> standalone_ids = {1};
+			
             for (auto &layer_tools : m_wipe_tower_data.tool_ordering.layer_tools()) { // for all layers
                 if (!layer_tools.has_wipe_tower)
                     continue;
@@ -3300,11 +3304,14 @@ void Print::_make_wipe_tower()
                 wipe_tower.plan_toolchange((float) layer_tools.print_z, (float) layer_tools.wipe_tower_layer_height, current_extruder_id,
                                            current_extruder_id, false);
                 for (const auto extruder_id : layer_tools.extruders) {
+					bool swappingToStandalone = standalone_ids.find(extruder_id) != standalone_ids.end();
+					
                     if ((first_layer && extruder_id == m_wipe_tower_data.tool_ordering.all_extruders().back()) || extruder_id !=
                         current_extruder_id) {
                         float volume_to_wipe = m_config.prime_volume;
-                        if (m_config.purge_in_prime_tower && m_config.single_extruder_multi_material) {
-                            volume_to_wipe = wipe_volumes[current_extruder_id][extruder_id]; // total volume to wipe after this toolchange
+						
+                        if (m_config.purge_in_prime_tower && m_config.single_extruder_multi_material && !swappingToStandalone) {
+                            volume_to_wipe = wipe_volumes[current_shared_id][extruder_id]; // total volume to wipe after this toolchange
                             volume_to_wipe *= m_config.flush_multiplier.get_at(0);
                             // Not all of that can be used for infill purging:
                             volume_to_wipe -= (float) m_config.filament_minimal_purge_on_wipe_tower.get_at(extruder_id);
@@ -3320,7 +3327,11 @@ void Print::_make_wipe_tower()
                         // request a toolchange at the wipe tower with at least volume_to_wipe purging amount
                         wipe_tower.plan_toolchange((float) layer_tools.print_z, (float) layer_tools.wipe_tower_layer_height,
                                                    current_extruder_id, extruder_id, volume_to_wipe);
+												   
                         current_extruder_id = extruder_id;
+						
+						if(!swappingToStandalone)
+							current_shared_id = extruder_id;
                     }
                 }
                 layer_tools.wiping_extrusions().ensure_perimeters_infills_order(*this);
