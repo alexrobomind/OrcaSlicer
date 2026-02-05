@@ -1078,7 +1078,7 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
                                                   double                             z) const
     {
         if (new_extruder_id != -1 && new_extruder_id != tcr.new_tool)
-            throw Slic3r::InvalidArgument("Error: WipeTowerIntegration::append_tcr was asked to do a toolchange it didn't expect.");
+            throw Slic3r::InvalidArgument("Error: WipeTowerIntegration::append_tcr2 was asked to do a toolchange it didn't expect.");
 
         std::string gcode;
 
@@ -1290,7 +1290,8 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
     std::string WipeTowerIntegration::prime(GCode &gcodegen)
     {
         std::string gcode;
-        if (!gcodegen.is_BBL_Printer() && !gcodegen.is_QIDI_Printer()) {
+        //if (!gcodegen.is_BBL_Printer() && !gcodegen.is_QIDI_Printer()) {
+        if (false) {
             for (const WipeTower::ToolChangeResult &tcr : m_priming) {
                 if (!tcr.extrusions.empty())
                     gcode += append_tcr2(gcodegen, tcr, tcr.new_tool);
@@ -1306,7 +1307,8 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
         assert(m_layer_idx >= 0);
         if (m_layer_idx >= (int) m_tool_changes.size())
             return gcode;
-        if (!gcodegen.is_BBL_Printer() && !gcodegen.is_QIDI_Printer()) {
+        // if (!gcodegen.is_BBL_Printer() && !gcodegen.is_QIDI_Printer()) {
+		if(false) {
             if (gcodegen.writer().need_toolchange(extruder_id) || finish_layer) {
                 if (m_layer_idx < (int) m_tool_changes.size()) {
                     if (!(size_t(m_tool_change_idx) < m_tool_changes[m_layer_idx].size()))
@@ -1395,7 +1397,8 @@ static std::vector<Vec2d> get_path_of_change_filament(const Print& print)
     std::string WipeTowerIntegration::finalize(GCode &gcodegen)
     {
         std::string gcode;
-        if (!gcodegen.is_BBL_Printer() && !gcodegen.is_QIDI_Printer()) {
+        // if (!gcodegen.is_BBL_Printer() && !gcodegen.is_QIDI_Printer()) {
+		if(false) {
             if (std::abs(gcodegen.writer().get_position().z() - m_final_purge.print_z) > EPSILON)
                 gcode += gcodegen.change_layer(m_final_purge.print_z);
             gcode += append_tcr2(gcodegen, m_final_purge, -1);
